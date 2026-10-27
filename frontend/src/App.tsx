@@ -1,45 +1,89 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { api, formatDate, type ProjectSummary } from "./api";
 import { HelpTooltip } from "./components/HelpTooltip";
 import { helpTopics } from "./help/content";
+import { ProjectView } from "./views/ProjectView";
 
-type Tab = "overview" | "help";
+type Tab = "projects" | "help";
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>("overview");
-  const [projectName, setProjectName] = useState("");
+  const [tab, setTab] = useState<Tab>("projects");
+  const [projectSlug, setProjectSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "F1") { event.preventDefault(); setTab("help"); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return <main className="app-shell">
     <header className="topbar">
-      <div><p className="eyebrow">LOKAL · OFFLINE-FIRST</p><h1>LogSanitizer</h1></div>
+      <div><p className="eyebrow">LOKAL · OFFLINE</p><h1>LogSanitizer</h1></div>
       <nav aria-label="Hauptnavigation" className="nav-tabs">
-        <button className={tab === "overview" ? "active" : ""} onClick={() => setTab("overview")}>Übersicht</button>
-        <button className={tab === "help" ? "active" : ""} onClick={() => setTab("help")}>Hilfe</button>
+        <button className={tab === "projects" ? "active" : ""} onClick={() => { setTab("projects"); setProjectSlug(null); }}>Projekte</button>
+        <button className={tab === "help" ? "active" : ""} onClick={() => setTab("help")} title="Hilfe (F1)">Hilfe</button>
       </nav>
     </header>
-    {tab === "overview" ? <>
-      <section className="hero">
-        <span className="status-pill"><span className="status-dot" /> Entwicklungsgerüst</span>
-        <h2>Logs sicher vorbereiten.</h2>
-        <p>Die lokale Arbeitsumgebung für die regelbasierte Bereinigung von Anwendungslogs.</p>
-        <div className="notice" role="status"><strong>Noch nicht für echte Logdaten freigegeben.</strong><span>Regel-Engine, Streaming-Verarbeitung, geschützte Zuordnungen und Freigabekontrollen sind noch nicht implementiert.</span></div>
-      </section>
-      <section className="panel">
-        <div className="section-heading"><div><p className="eyebrow">ARBEITSBEREICH</p><h3>Projekt vorbereiten</h3></div>
-          <HelpTooltip label="Projektname" help="Ein Projekt gruppiert Logdateien, Regeln und konsistente Platzhalterzuordnungen. In diesem Entwicklungsstand wird noch kein Projekt dauerhaft gespeichert."><span className="help-label">Hilfe zum Projektname</span></HelpTooltip>
-        </div>
-        <label htmlFor="project-name">Projektname</label>
-        <input id="project-name" value={projectName} onChange={event => setProjectName(event.target.value)} placeholder="z. B. Testprojekt" maxLength={80} />
-        <p className="field-help">Dies ist derzeit nur ein UI-Prototyp; Eingaben werden nicht gespeichert.</p>
-        <button className="primary-button" disabled={!projectName.trim()} onClick={() => window.alert("Projektverwaltung ist für einen späteren Meilenstein vorgesehen.")}>Projekt vorbereiten</button>
-      </section>
-      <section className="feature-grid" aria-label="Projektprinzipien">
-        <article className="feature-card"><span className="feature-number">01</span><h3>Lokal bleiben</h3><p>Keine Cloud- oder externen API-Abhängigkeiten im vorgesehenen Betrieb.</p></article>
-        <article className="feature-card"><span className="feature-number">02</span><h3>Originale schützen</h3><p>Quelldateien bleiben unverändert. Verarbeitung erfolgt in getrennten Arbeitsbereichen.</p></article>
-        <article className="feature-card"><span className="feature-number">03</span><h3>Freigabe kontrollieren</h3><p>Unvollständige Läufe dürfen später nicht exportiert oder freigegeben werden.</p></article>
-      </section>
-    </> : <section className="help-page"><p className="eyebrow">OFFLINE-HANDBUCH</p><h2>Hilfe und Grundlagen</h2><p className="intro">Diese Hilfe ist lokal eingebunden. Die Themen werden während der Entwicklung erweitert.</p>
-      <div className="help-list">{helpTopics.map(topic => <article className="help-topic" key={topic.id}><h3>{topic.title}</h3><p>{topic.summary}</p><ul>{topic.steps.map(step => <li key={step}>{step}</li>)}</ul></article>)}</div>
-    </section>}
-    <footer><span>LogSanitizer · 0.1.0-dev</span><span>Keine echten oder vertraulichen Logs in diesem Entwicklungsstand verarbeiten.</span></footer>
+    {tab === "help" ? <HelpPage /> : projectSlug
+      ? <ProjectView slug={projectSlug} onBack={() => setProjectSlug(null)} />
+      : <ProjectList onOpen={setProjectSlug} />}
+    <footer><span>LogSanitizer · 0.1.0-dev</span><span>Ein bestandener Restscan senkt das Risiko, beweist aber nicht, dass alle sensiblen Daten erkannt wurden.</span></footer>
   </main>;
+}
+
+function ProjectList({ onOpen }: { onOpen: (slug: string) => void }) {
+  const [projects, setProjects] = useState<ProjectSummary[] | null>(null);
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+
+  const load = useCallback(() => {
+    api<ProjectSummary[]>("GET", "/projects").then(setProjects).catch(e => setError(e.message));
+  }, []);
+  useEffect(load, [load]);
+
+  const create = async () => {
+    setError("");
+    try {
+      const project = await api<{ slug: string }>("POST", "/projects", { name });
+      setName("");
+      onOpen(project.slug);
+    } catch (e) { setError((e as Error).message); }
+  };
+
+  return <>
+    <section className="hero">
+      <span className="status-pill"><span className="status-dot" /> Läuft nur auf diesem Rechner</span>
+      <h2>Logs sicher vorbereiten.</h2>
+      <p>Interne Namen, IP-Adressen und Zugangsdaten werden durch konsistente Platzhalter ersetzt. Originaldateien bleiben unverändert.</p>
+    </section>
+    {error && <div className="notice error" role="alert"><strong>Fehler</strong><span>{error}</span></div>}
+    <section className="panel">
+      <div className="section-heading"><div><p className="eyebrow">NEUES PROJEKT</p><h3>Projekt anlegen</h3></div>
+        <HelpTooltip label="Hilfe zu Projekten" help="Ein Projekt bündelt Logdateien, Regeln, Namenslisten und die Zuordnungstabelle. Gleiche Werte erhalten innerhalb eines Projekts immer denselben Platzhalter – auch über spätere Läufe hinweg." />
+      </div>
+      <label htmlFor="project-name">Projektname</label>
+      <div className="row">
+        <input id="project-name" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => e.key === "Enter" && name.trim() && create()} placeholder="z. B. Kunde A – Störung Oktober" maxLength={80} />
+        <button className="primary-button" disabled={!name.trim()} onClick={create}>Anlegen</button>
+      </div>
+    </section>
+    <section className="panel wide">
+      <p className="eyebrow">VORHANDENE PROJEKTE</p>
+      {projects === null ? <p className="muted">Lade …</p> : projects.length === 0 ? <p className="muted">Noch keine Projekte.</p> :
+        <ul className="list">{projects.map(p => <li key={p.slug}>
+          <button className="list-item" onClick={() => onOpen(p.slug)}>
+            <strong>{p.name}</strong><span className="muted">{p.sources} Datei(en) · angelegt {formatDate(p.created)}</span>
+          </button>
+        </li>)}</ul>}
+    </section>
+  </>;
+}
+
+function HelpPage() {
+  return <section className="help-page"><p className="eyebrow">OFFLINE-HANDBUCH</p><h2>Hilfe und Grundlagen</h2>
+    <p className="intro">Diese Hilfe ist lokal eingebunden und jederzeit mit F1 erreichbar.</p>
+    <div className="help-list">{helpTopics.map(topic => <article className="help-topic" key={topic.id} id={`help-${topic.id}`}><h3>{topic.title}</h3><p>{topic.summary}</p><ul>{topic.steps.map(step => <li key={step}>{step}</li>)}</ul></article>)}</div>
+  </section>;
 }

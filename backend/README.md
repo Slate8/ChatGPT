@@ -1,15 +1,23 @@
 # Backend
 
-From this directory:
+Python 3.10+ using only the standard library at runtime.
 
 ```bash
 python -m venv .venv
-# Windows PowerShell: .venv\\Scripts\\Activate.ps1
+# Windows PowerShell: .venv\Scripts\Activate.ps1
 # Linux: source .venv/bin/activate
 python -m pip install -e ".[dev]"
-uvicorn logsanitizer.main:app --reload --host 127.0.0.1 --port 8000
+python -m pytest
+python -m ruff check src tests
 ```
 
-Health check: http://127.0.0.1:8000/api/health. API docs: http://127.0.0.1:8000/api/docs.
+Run it:
 
-Run tests with `pytest`. This scaffold is not approved for real/sensitive logs and must not be exposed to a network.
+```bash
+python -m logsanitizer --workspace ../workspace serve        # web UI on 127.0.0.1:8765
+python -m logsanitizer selftest                              # synthetic end-to-end test
+python -m logsanitizer samples /tmp/samples --big-mb 500     # synthetic data
+python -m logsanitizer --workspace ../workspace sanitize --project demo -r /tmp/samples
+```
+
+The UI is served from `../frontend/dist` (override with `LOGSANITIZER_STATIC`). Set `LOGSANITIZER_WORKERS` to force a number of worker processes.
