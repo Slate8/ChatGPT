@@ -1,0 +1,24 @@
+LogSanitizer – Kurzanleitung
+============================
+
+Keine Installation und keine Administratorrechte nötig.
+
+Windows
+  start.bat        Oberfläche starten (öffnet den Browser)
+  selbsttest.bat   Funktionstest mit erfundenen Daten
+  cli.bat ...      Befehlszeile, z. B.: cli.bat sanitize --project Kunde-A D:\Logs
+
+Linux (Python 3.10 oder neuer erforderlich)
+  ./start.sh       Oberfläche starten
+  ./cli.sh selftest
+
+Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1) und nur über
+den beim Start angezeigten Link. Fenster offen lassen, solange gearbeitet wird.
+
+Projekte, Namenslisten, Zuordnungen und Ergebnisse liegen im Ordner
+"workspace" neben diesem Text. Der Ordner ist VERTRAULICH: Er enthält die
+Zuordnung aller Platzhalter zu den Originalwerten. Weitergegeben werden darf
+nur der Ordner "output" eines freigabefähigen Laufs.
+
+Ausführliche Anleitung: ANLEITUNG.md (mit jedem Texteditor lesbar)
+sowie in der Oberfläche unter "Hilfe" oder mit F1.

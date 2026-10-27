@@ -1,6 +1,6 @@
 # LogSanitizer — Anforderungen v2.7
 
-Status: Planungsbaseline; Implementierung läuft an.
+Status: Planungsbaseline; Meilenstein 1 (lokaler Kern) umgesetzt, siehe ROADMAP.md.
 
 ## Plattform und Betrieb
 - Portable lokale Anwendung für Windows und Linux; macOS ist nicht vorgesehen.
@@ -11,7 +11,8 @@ Status: Planungsbaseline; Implementierung läuft an.
 - Standardmäßig nur an 127.0.0.1 binden. Netzwerkzugriff nur auf explizit konfigurierter IP und erst mit Authentifizierung/Berechtigungen.
 
 ## Stack und Skalierung
-- Python/FastAPI, React/TypeScript, SQLite-Metadaten, versionierte JSON-Konfigurationen.
+- Python (≥ 3.10, nur Standardbibliothek – keine Paketinstallation vor Ort), React/TypeScript (vorab gebaut), SQLite-Metadaten, versionierte JSON-Konfigurationen.
+- Ohne Installation und ohne Administratorrechte lauffähig (Windows-Paket mit eingebettetem Python).
 - Dateien von mindestens 5 GB streamend verarbeiten; gesamte Datei nicht in RAM laden.
 - Streaming plus temporäre Indizes; temporäre und dauerhaft speicherbare Projekte.
 
@@ -49,4 +50,4 @@ Status: Planungsbaseline; Implementierung läuft an.
 - Windows/Linux und Offline-Betrieb sind Zielanforderungen.
 
 ## Noch nicht implementiert
-Regel-Engine, Streaming-Pipeline, dauerhafte Mappings, Authentifizierung/RBAC, Review/Freigabe, Ausnahmen, Audit, SMTP/LDAP und portable Paketierung sind geplante Funktionen, keine vorhandenen Fähigkeiten.
+Authentifizierung/RBAC, Prüfer-Workflow mit Freigabe/Rückgabe, Ausnahmen, Audit, SMTP/LDAP, Netzwerkmodus und Verschlüsselung der Zuordnungen sind geplante Funktionen, keine vorhandenen Fähigkeiten. Umgesetzt sind Projekte, Import, Regel-Engine, Streaming, dauerhafte Zuordnungen, Pflichtprüfungen mit Restscan und portable Paketierung.
