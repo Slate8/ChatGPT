@@ -125,4 +125,8 @@ jobs:
           name: packages
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" --title "LogSanitizer ${GITHUB_REF_NAME}" --notes "Windows: LogSanitizer-*-windows-x64.zip (enthält Python). Linux: *-portable.zip (Python 3.10+ nötig). Prüfsummen in SHA256SUMS.txt." *.zip SHA256SUMS.txt
+        run: |
+          gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" \
+            --title "LogSanitizer ${GITHUB_REF_NAME}" \
+            --notes "Windows: LogSanitizer-*-windows-x64.zip (enthält Python). Linux: *-portable.zip (Python 3.10+ nötig). Prüfsummen in SHA256SUMS.txt. Anleitung: ANLEITUNG.md im Paket." \
+            *.zip SHA256SUMS.txt
