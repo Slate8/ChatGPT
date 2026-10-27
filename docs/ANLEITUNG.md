@@ -41,7 +41,9 @@ Ein Konsolenfenster öffnet sich und der Browser startet automatisch mit der Obe
 
 - Das **Konsolenfenster offen lassen**, solange gearbeitet wird.
 - **Beenden:** Fenster schließen oder darin `Strg+C` drücken.
-- Die Oberfläche ist nur auf diesem Rechner erreichbar und nur über den Link mit Sitzungsschlüssel. Nach einem Neustart gilt ein neuer Link.
+- Die Oberfläche ist nur auf diesem Rechner erreichbar und nur über den Startlink. Er enthält einen zufälligen Sitzungsschlüssel (`#token=…`), damit keine andere Webseite und kein anderer Benutzer auf die Daten zugreifen kann.
+- Nach dem ersten Öffnen merkt sich der Browser den Schlüssel. Neue Tabs und Neuladen funktionieren dann ohne den Link.
+- **Bei jedem Programmstart entsteht ein neuer Schlüssel.** Alte Links und Lesezeichen gelten danach nicht mehr. Zeigt der Browser „Bitte über den Startlink öffnen“, einfach den aktuellen Link aus dem Konsolenfenster öffnen.
 
 ## 4. Arbeitsablauf in der Oberfläche
 
@@ -161,7 +163,7 @@ Werte, die einmal erkannt wurden (z. B. `m.muster` aus `FIRMA\m.muster`), werden
 | Programm startet nicht, Meldung zu blockierter Anwendung | Die IT-Richtlinie (z. B. AppLocker) verbietet eigene Programme. Mit der IT klären oder den Linux-Weg nutzen. |
 | Linux: „Python 3.10 oder neuer wurde nicht gefunden“ | `python3 --version` prüfen. Auf älteren Systemen das Paket `python3.10` (oder neuer) installieren lassen. |
 | Browser öffnet sich nicht | Link aus dem Konsolenfenster manuell öffnen. |
-| „Sitzung ungültig“ im Browser | Das Programm wurde neu gestartet. Den neuen Link aus dem Konsolenfenster verwenden. |
+| „Bitte über den Startlink öffnen“ bzw. „Sitzung ungültig“ | Das Programm wurde neu gestartet, oder die Seite wurde ohne Startlink geöffnet (z. B. über ein Lesezeichen). Den aktuellen Link aus dem Konsolenfenster vollständig kopieren und öffnen. Ist das Fenster geschlossen, `start.bat` bzw. `start.sh` neu starten. |
 | Port belegt | Das Programm nimmt automatisch den nächsten freien Port. Der Link im Fenster zeigt, welchen. |
 | Lauf fehlgeschlagen: „Zeichenkodierung passt nicht“ | Im Reiter *Dateien* die Kodierung der Datei setzen, z. B. `cp1252` (ältere Windows-Programme), `latin-1` oder `utf-16-le+BOM`. |
 | Lauf fehlgeschlagen: „vermutlich binär“ | Die Datei ist kein Textlog (z. B. `.evtx`, `.zip`). Vorher als Text exportieren oder aus dem Projekt entfernen. |

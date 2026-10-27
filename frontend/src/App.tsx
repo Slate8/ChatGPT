@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { api, formatDate, type ProjectSummary } from "./api";
+import { api, formatDate, hasToken, UNAUTHORIZED_EVENT, type ProjectSummary } from "./api";
 import { HelpTooltip } from "./components/HelpTooltip";
 import { helpTopics } from "./help/content";
 import { ProjectView } from "./views/ProjectView";
@@ -9,6 +9,13 @@ type Tab = "projects" | "help";
 export default function App() {
   const [tab, setTab] = useState<Tab>("projects");
   const [projectSlug, setProjectSlug] = useState<string | null>(null);
+  const [sessionValid, setSessionValid] = useState(hasToken);
+
+  useEffect(() => {
+    const onUnauthorized = () => setSessionValid(false);
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+  }, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -26,11 +33,23 @@ export default function App() {
         <button className={tab === "help" ? "active" : ""} onClick={() => setTab("help")} title="Hilfe (F1)">Hilfe</button>
       </nav>
     </header>
-    {tab === "help" ? <HelpPage /> : projectSlug
+    {!sessionValid ? <SessionScreen /> : tab === "help" ? <HelpPage /> : projectSlug
       ? <ProjectView slug={projectSlug} onBack={() => setProjectSlug(null)} />
       : <ProjectList onOpen={setProjectSlug} />}
     <footer><span>LogSanitizer · 0.1.0-dev</span><span>Ein bestandener Restscan senkt das Risiko, beweist aber nicht, dass alle sensiblen Daten erkannt wurden.</span></footer>
   </main>;
+}
+
+function SessionScreen() {
+  return <section className="hero session" role="alert">
+    <span className="status-pill warn-pill"><span className="status-dot" /> Keine gültige Sitzung</span>
+    <h2>Bitte über den Startlink öffnen.</h2>
+    <p>Aus Sicherheitsgründen ist LogSanitizer nur über den Link erreichbar, den das Programm beim Start anzeigt. Bei jedem Neustart entsteht ein neuer Link, alte Links und Lesezeichen gelten dann nicht mehr.</p>
+    <ol className="session-steps">
+      <li>Das schwarze Konsolenfenster von LogSanitizer suchen. Falls es geschlossen wurde: <code>start.bat</code> (Windows) bzw. <code>start.sh</code> (Linux) erneut starten.</li>
+      <li>Den dort angezeigten Link <code>http://127.0.0.1:…/#token=…</code> vollständig kopieren und im Browser öffnen.</li>
+    </ol>
+  </section>;
 }
 
 function ProjectList({ onOpen }: { onOpen: (slug: string) => void }) {

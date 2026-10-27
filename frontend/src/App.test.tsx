@@ -26,6 +26,12 @@ describe("LogSanitizer app", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("nicht gefunden");
   });
 
+  it("explains how to reopen the app when the session is invalid", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 401, json: async () => ({ error: "Sitzung ungültig." }) })));
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Bitte über den Startlink öffnen." })).toBeInTheDocument();
+  });
+
   it("opens the offline help with F1", async () => {
     mockApi({ "/projects": [] });
     render(<App />);

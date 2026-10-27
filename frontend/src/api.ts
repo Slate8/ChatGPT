@@ -1,18 +1,25 @@
 /** Client for the local LogSanitizer API. The session token comes from the start URL. */
 
 const TOKEN_KEY = "logsanitizer-token";
+export const UNAUTHORIZED_EVENT = "logsanitizer:unauthorized";
 
+// The token is stored per browser (not per tab) so new tabs and reloads keep working.
+// It only stays valid until the program is restarted, which creates a new one.
 function readToken(): string {
   const match = window.location.hash.match(/token=([\w-]+)/);
   if (match) {
-    try { sessionStorage.setItem(TOKEN_KEY, match[1]); } catch { /* storage unavailable */ }
+    try { localStorage.setItem(TOKEN_KEY, match[1]); } catch { /* storage unavailable */ }
     history.replaceState(null, "", window.location.pathname);
     return match[1];
   }
-  try { return sessionStorage.getItem(TOKEN_KEY) ?? ""; } catch { return ""; }
+  try { return localStorage.getItem(TOKEN_KEY) ?? ""; } catch { return ""; }
 }
 
 const token = readToken();
+
+export function hasToken(): boolean {
+  return token !== "";
+}
 
 export class ApiError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
@@ -25,6 +32,7 @@ export async function api<T>(method: string, path: string, body?: unknown): Prom
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   const data = await response.json().catch(() => ({}));
+  if (response.status === 401) window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
   if (!response.ok) throw new ApiError(data.error ?? `Fehler ${response.status}`, response.status);
   return data as T;
 }

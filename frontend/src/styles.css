@@ -53,3 +53,5 @@ details summary{cursor:pointer;color:var(--muted);margin-top:12px}
 .browser{list-style:none;margin:0 0 14px;padding:0;overflow-y:auto;display:grid;gap:4px}
 .browser-row{display:flex;gap:8px;align-items:center}.browser-row input{width:auto}.browser .list-item{padding:8px 12px}
 @media(max-width:720px){.edit-grid{grid-template-columns:1fr}.span-2{grid-column:auto}.row>input{flex-basis:100%}}
+.warn-pill{border-color:#6d5635;background:#2a2118;color:#f2d6a9}.warn-pill .status-dot{background:#f2b45a}
+.session-steps{color:var(--muted);line-height:1.8;padding-left:20px;max-width:680px}

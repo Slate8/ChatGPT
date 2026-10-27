@@ -129,4 +129,5 @@ jobs:
           gh release create "${GITHUB_REF_NAME}" --repo "${GITHUB_REPOSITORY}" \
             --title "LogSanitizer ${GITHUB_REF_NAME}" \
             --notes "Windows: LogSanitizer-*-windows-x64.zip (enthält Python). Linux: *-portable.zip (Python 3.10+ nötig). Prüfsummen in SHA256SUMS.txt. Anleitung: ANLEITUNG.md im Paket." \
+            $(case "${GITHUB_REF_NAME}" in *-*) echo --prerelease;; esac) \
             *.zip SHA256SUMS.txt
